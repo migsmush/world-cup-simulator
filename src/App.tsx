@@ -1,17 +1,36 @@
-import './App.css'
+import { fetchRankingOverview } from './api';
 import { MyButton, MyTextInput } from './components'
+import { View, Text, Dimensions, TouchableHighlight, Button } from 'react-native'
 
-function App() {
+const App = () => {
+
+  const { width, height } = Dimensions.get('window');
+
+  const onPressButton = () => {
+    console.log("button pressed, rank overview bellow: ")
+    fetchRankingOverview();
+  };
 
   return (
-    <>
-      <MyButton />
-      <MyTextInput />
-      <h1 className="text-2xl font-bold underline text-white bg-blue-400">
-        Hello World!
-      </h1>
-    </>
-  )
+    <View
+      style={{
+        width,
+        height,
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+        <Text>Hello</Text>
+        <Text>Try editing me! 🎉</Text>
+      <TouchableHighlight underlayColor='#ff0000' onPress={() => {}} style={{ borderWidth: 0}}>
+        <View style={{backgroundColor: '#DDDDDD', alignItems: 'center', justifyContent: 'center', padding: 10}}>
+          <Text>Press Me</Text>
+        </View>
+      </TouchableHighlight>
+      <Button onPress={onPressButton} title='my button' color={'#dd0000'}/>
+    </View>
+  );
 }
 
 export default App
