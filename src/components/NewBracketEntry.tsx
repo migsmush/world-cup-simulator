@@ -30,6 +30,10 @@ const NewBracketEntry = ({
   windowWidth,
 }: NewBracketEntryProps) => {
   const viewRef = useRef(null);
+  const [settledScore, setSettledScore] = useState({
+    team1Score: null,
+    team2Score: null,
+  });
 
   useEffect(() => {
     viewRef.current?.measure?.((x, y, width, height, pageX, pageY) => {
@@ -84,6 +88,8 @@ const NewBracketEntry = ({
     } else {
       onSimulateMatchSettled(team2, colId, blockNum);
     }
+    const newSettledScore = { team1Score, team2Score };
+    setSettledScore(newSettledScore);
   };
 
   const onPressSimulate = () => {
@@ -95,6 +101,14 @@ const NewBracketEntry = ({
 
   const onLayout = (e: LayoutChangeEvent) => {
     onLayoutCallback(e, colId, blockNum);
+  };
+
+  const isMatchSettled = () => {
+    return settledScore.team1Score !== null && settledScore.team2Score !== null;
+  };
+
+  const isSimulateButtonShown = () => {
+    return isMatchSettled() && (team1 === null || team2 === null);
   };
 
   return (
@@ -113,11 +127,18 @@ const NewBracketEntry = ({
     >
       <Text>{team1?.rankingItem?.name}</Text>
       <Text>{team2?.rankingItem?.name}</Text>
-      <Button
-        onPress={onPressSimulate}
-        color="#ff0000"
-        title="simulate match"
-      />
+      {isMatchSettled() && (
+        <Text>
+          {settledScore.team1Score} - {settledScore.team2Score}
+        </Text>
+      )}
+      {isSimulateButtonShown() && (
+        <Button
+          onPress={onPressSimulate}
+          color="#ff0000"
+          title="simulate match"
+        />
+      )}
     </View>
   );
 };
