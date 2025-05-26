@@ -12,6 +12,11 @@ type NewBracketEntryProps = {
   ) => void;
   colId: number;
   blockNum: number;
+  onSimulateMatchSettled: (
+    winningTeam: RankingData,
+    colId: number,
+    blockNum: number,
+  ) => void;
   windowWidth: number;
 };
 
@@ -21,6 +26,7 @@ const NewBracketEntry = ({
   onLayoutCallback,
   colId,
   blockNum,
+  onSimulateMatchSettled,
   windowWidth,
 }: NewBracketEntryProps) => {
   const viewRef = useRef(null);
@@ -46,7 +52,7 @@ const NewBracketEntry = ({
     });
   }, [windowWidth]);
   const simulateMatch = (odds1: number, odds2: number) => {
-    console.log(odds1);
+    // console.log(odds1);
     const fullTime = 90;
     let i = 0;
     let team1Score = 0;
@@ -70,9 +76,14 @@ const NewBracketEntry = ({
       }
       i += 10;
     }
-    console.log(odds2);
-    console.log("TEAM 1 SCORE: ", team1Score);
-    console.log("TEAM 2 SCORE: ", team2Score);
+    // console.log(odds2);
+    // console.log("TEAM 1 SCORE: ", team1Score);
+    // console.log("TEAM 2 SCORE: ", team2Score);
+    if (team1Score >= team2Score) {
+      onSimulateMatchSettled(team1, colId, blockNum);
+    } else {
+      onSimulateMatchSettled(team2, colId, blockNum);
+    }
   };
 
   const onPressSimulate = () => {
@@ -100,8 +111,8 @@ const NewBracketEntry = ({
         width: 200,
       }}
     >
-      <Text>{team1.rankingItem.name}</Text>
-      <Text>{team2.rankingItem.name}</Text>
+      <Text>{team1?.rankingItem?.name}</Text>
+      <Text>{team2?.rankingItem?.name}</Text>
       <Button
         onPress={onPressSimulate}
         color="#ff0000"

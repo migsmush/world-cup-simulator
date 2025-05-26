@@ -14,10 +14,43 @@ const TOTAL_TEAMS = 8;
 const TOTAL_COLS = Math.log2(TOTAL_TEAMS);
 const EXPECTED_LAYOUTS = TOTAL_TEAMS - 1;
 
+const initialTourneyState = [
+  {
+    team1: null,
+    team2: null,
+  },
+  {
+    team1: null,
+    team2: null,
+  },
+  {
+    team1: null,
+    team2: null,
+  },
+  {
+    team1: mockRankingOverview.rankings[7],
+    team2: mockRankingOverview.rankings[6],
+  },
+  {
+    team1: mockRankingOverview.rankings[5],
+    team2: mockRankingOverview.rankings[4],
+  },
+  {
+    team1: mockRankingOverview.rankings[3],
+    team2: mockRankingOverview.rankings[2],
+  },
+  {
+    team1: mockRankingOverview.rankings[1],
+    team2: mockRankingOverview.rankings[0],
+  },
+];
+
 const App = () => {
   const [layoutObjs, setLayoutObjs] = useState([
     ...Array(EXPECTED_LAYOUTS).keys(),
   ]);
+  const [tourneyState, setTourneyState] = useState(initialTourneyState);
+
   const { width } = useWindowDimensions();
 
   const onLayoutCallback = (
@@ -25,7 +58,7 @@ const App = () => {
     colId: number,
     blockNum: number,
   ) => {
-    console.log("onLayoutCallback fired");
+    // console.log("onLayoutCallback fired");
     setLayoutObjs((prevLayoutObjs) => {
       let indexToUpdate;
       indexToUpdate = 2 * colId + blockNum;
@@ -36,9 +69,29 @@ const App = () => {
     });
   };
 
-  useEffect(() => {
-    console.log(layoutObjs);
-  }, [layoutObjs]);
+  const onSimulateMatchSettled = (winningTeam, colId, blockNum) => {
+    console.log(colId, "COLID");
+    console.log(blockNum, "BLOCKNUM");
+    setTourneyState((prevTourneyState) => {
+      const settledIndex = 2 * colId + blockNum;
+      const indexToUpdate = Math.floor(settledIndex / 2) - 1;
+      console.log(settledIndex, "SETTLEDINDEX");
+      console.log(indexToUpdate, "INDEXTOUPDATE");
+      const curDataForIndex = prevTourneyState[indexToUpdate];
+      if (settledIndex % 2 == 1) {
+        curDataForIndex.team1 = winningTeam;
+      } else {
+        curDataForIndex.team2 = winningTeam;
+      }
+      const newTournayState = [...prevTourneyState];
+      newTournayState[indexToUpdate] = curDataForIndex;
+      return newTournayState;
+    });
+  };
+
+  // useEffect(() => {
+  //   console.log(layoutObjs);
+  // }, [layoutObjs]);
 
   const renderBracketCol = (nTeams, colNum, windowWidth) => {
     const numTeams = nTeams / Math.pow(2, colNum);
@@ -54,17 +107,25 @@ const App = () => {
         }}
         key={`bracketCol_${colNum}`}
       >
-        {arr.map((i) => (
-          <NewBracketEntry
-            team1={mockRankingOverview.rankings[0]}
-            team2={mockRankingOverview.rankings[0]}
-            onLayoutCallback={onLayoutCallback}
-            colId={colId}
-            blockNum={i}
-            key={`${colId}_${i}`}
-            windowWidth={windowWidth}
-          />
-        ))}
+        {arr.map((i) => {
+          let indexForTourneyState = 2 * colId + i - 1;
+          if (colId === 0) indexForTourneyState = 0;
+          // console.log(indexForTourneyState);
+          const tourneyData = tourneyState[indexForTourneyState];
+          // console.log(tourneyData);
+          return (
+            <NewBracketEntry
+              team1={tourneyData.team1}
+              team2={tourneyData.team2}
+              onLayoutCallback={onLayoutCallback}
+              colId={colId}
+              blockNum={i}
+              key={`${colId}_${i}`}
+              onSimulateMatchSettled={onSimulateMatchSettled}
+              windowWidth={windowWidth}
+            />
+          );
+        })}
       </View>
     );
   };
